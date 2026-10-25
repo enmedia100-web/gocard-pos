@@ -30,7 +30,7 @@
   "order.orderNumberSent": "Commande #{number} · envoyée en cuisine",
   "order.orderMore": "Commander plus",
   "order.whatsYourName": "Quel est votre nom ?",
-  "order.namePlaceholder": "p. ex. Priya",
+  "order.namePlaceholder": "p. ex. Nusrat",
   "order.continueToMenu": "Continuer vers le menu",
   "order.add": "Ajouter",
   "order.placingOrder": "Envoi de la commande…",
@@ -38,5 +38,6 @@
   "order.item": "article",
   "order.items": "articles",
   "order.couldNotPlace": "Impossible de passer la commande — demandez de l'aide à un membre du personnel.",
-  "order.pricesIncludeTax": "Les prix incluent les taxes. Le personnel confirmera votre commande sous peu."
+  "order.pricesIncludeTax": "Les prix incluent les taxes. Le personnel confirmera votre commande sous peu.",
+  "order.taxAdded": "La {tax} est ajoutée à l'addition. Le personnel confirmera votre commande sous peu."
 }

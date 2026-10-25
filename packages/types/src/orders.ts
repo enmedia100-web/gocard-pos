@@ -28,6 +28,11 @@ export const paymentMethodSchema = z.enum([
   "CASH",
   "CARD",
   "UPI",
+  // Bangladesh mobile financial services, recorded at the counter after the
+  // guest pays the restaurant's merchant number (no online checkout yet).
+  "BKASH",
+  "NAGAD",
+  "ROCKET",
   "WALLET",
   "BANK_TRANSFER",
   "GIFT_CARD",

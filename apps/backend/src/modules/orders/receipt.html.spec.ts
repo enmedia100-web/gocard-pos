@@ -69,3 +69,22 @@ describe('receipt HTML with VERI*FACTU', () => {
     ).not.toContain('QR tributario');
   });
 });
+
+describe('receipt HTML for Bangladesh', () => {
+  it('shows taka, the VAT label and the BIN', () => {
+    const html = buildReceiptHtml({
+      ...base,
+      currency: 'BDT',
+      branch: {
+        ...base.branch,
+        taxRegime: 'BD_VAT' as const,
+        taxMode: 'EXCLUSIVE' as const,
+        taxId: '000123456-0101',
+      },
+    });
+    expect(html).toContain('৳11.00');
+    expect(html).toContain('VAT');
+    expect(html).toContain('BIN');
+    expect(html).not.toContain('CGST');
+  });
+});

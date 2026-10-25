@@ -42,7 +42,7 @@ import {
   settlePayments,
   type Bill,
 } from './settlement';
-import type { TaxMode } from '@nodedr-restaurant/types';
+import { formatMoney, type TaxMode } from '@nodedr-restaurant/types';
 import { VerifactuService } from '../verifactu/verifactu.service';
 
 const KOT_FORWARD_STATUSES = [
@@ -150,11 +150,20 @@ export class OrdersService {
       where: { id: branchId },
       select: { taxMode: true },
     });
-    // Falls back to INCLUSIVE (the schema default, and the only mode that
-    // existed before multi-region tax) if the branch somehow can't be
+    // Falls back to INCLUSIVE (the only mode that existed before
+    // multi-region tax) if the branch somehow can't be
     // found here — createOrder/addItems already 404 earlier when the
     // branch itself is invalid, so this is just belt-and-suspenders.
     return branch?.taxMode ?? 'INCLUSIVE';
+  }
+
+  /** The branch's restaurant currency, for amounts written into messages. */
+  private async getBranchCurrency(branchId: string): Promise<string> {
+    const branch = await this.prisma.branch.findUnique({
+      where: { id: branchId },
+      select: { restaurant: { select: { currency: true } } },
+    });
+    return branch?.restaurant.currency ?? 'BDT';
   }
 
   async createOrder(
@@ -289,7 +298,7 @@ export class OrdersService {
         }
         if (totals.subtotal < Number(zone.minOrderAmount)) {
           throw new BadRequestException(
-            `Minimum order for ${zone.name} is ₹${Number(zone.minOrderAmount)}`,
+            `Minimum order for ${zone.name} is ${formatMoney(Number(zone.minOrderAmount), await this.getBranchCurrency(branchId))}`,
           );
         }
         delivery.deliveryZoneId = zone.id;
@@ -399,12 +408,13 @@ export class OrdersService {
     // creation, which has already committed by this point — log and move on.
     try {
       const who = full.guestName ?? full.customer?.name ?? undefined;
+      const currency = await this.getBranchCurrency(branchId);
       if (acceptance === 'PENDING') {
         // Needs a decision: goes to anyone who can accept/cancel orders.
         await this.notifications.notifyByPermission(branchId, 'orders.accept', {
           type: 'order.pending',
           title: 'New online order — accept?',
-          body: `Order ${full.orderNumber} (${full.type.replace('_', ' ')})${who ? ` — ${who}` : ''} · ₹${Number(full.totalAmount)}`,
+          body: `Order ${full.orderNumber} (${full.type.replace('_', ' ')})${who ? ` — ${who}` : ''} · ${formatMoney(Number(full.totalAmount), currency)}`,
           entity: 'Order',
           entityId: full.id,
         });

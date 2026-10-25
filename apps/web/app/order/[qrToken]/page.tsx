@@ -72,6 +72,9 @@ interface PublicMenuCategory {
 interface PublicMenuResponse {
   branchName: string;
   tableName: string;
+  currency: string;
+  taxMode: "INCLUSIVE" | "EXCLUSIVE";
+  taxLabel: string;
   categories: PublicMenuCategory[];
 }
 
@@ -312,7 +315,7 @@ export default function PublicMenuPage({
                               </p>
                             )}
                             <span className="mt-1 block text-sm font-medium tabular-nums text-foreground">
-                              {formatCurrency(item.price)}
+                              {formatCurrency(item.price, data?.currency)}
                             </span>
                           </div>
                         </div>
@@ -416,7 +419,9 @@ export default function PublicMenuPage({
       />
 
       <footer className="border-t border-border px-5 py-6 text-center text-xs text-muted-foreground">
-        {t("order.pricesIncludeTax")}
+        {data?.taxMode === "EXCLUSIVE"
+          ? t("order.taxAdded", { tax: data.taxLabel })
+          : t("order.pricesIncludeTax")}
       </footer>
 
       {cartCount > 0 && (
@@ -429,7 +434,7 @@ export default function PublicMenuPage({
             >
               {placeOrder.isPending
                 ? t("order.placingOrder")
-                : `${t("order.placeOrder")} — ${cartCount} ${cartCount > 1 ? t("order.items") : t("order.item")} · ${formatCurrency(cartTotal)}`}
+                : `${t("order.placeOrder")} — ${cartCount} ${cartCount > 1 ? t("order.items") : t("order.item")} · ${formatCurrency(cartTotal, data?.currency)}`}
             </Button>
           </div>
           {placeOrder.isError && (

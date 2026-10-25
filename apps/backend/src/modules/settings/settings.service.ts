@@ -84,7 +84,7 @@ export class SettingsService {
       }
     }
     // Picking a new regime without also stating a mode gets that regime's
-    // own default (INDIA_GST/EU_VAT/ES_IVA -> inclusive, US_SALES_TAX ->
+    // own default (INDIA_GST/EU_VAT/ES_IVA -> inclusive, BD_VAT/US_SALES_TAX ->
     // exclusive) — a picker that silently kept the old mode across a
     // regime switch would quietly mis-price every item on that branch.
     const data =

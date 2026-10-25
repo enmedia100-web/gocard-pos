@@ -13,6 +13,7 @@ import {
   resolveTaxIdLabel,
   resolveTaxLabel,
   TAX_REGIME_PRESETS,
+  paymentMethodLabel,
   type TaxMode,
   type TaxRegime,
 } from '@nodedr-restaurant/types';
@@ -28,6 +29,7 @@ export { resolveProfile, type PrinterProfile } from './escpos/encoder';
 // Preferred symbol first; used only when the selected code page can print it,
 // otherwise the ISO-style code after it (never a '?').
 const CURRENCY_SYMBOLS: Record<string, [string, string]> = {
+  BDT: ['Tk ', 'Tk '],
   INR: ['Rs.', 'Rs.'],
   USD: ['$', 'USD '],
   EUR: ['\u20ac', 'EUR '],
@@ -222,7 +224,7 @@ export function buildReceiptEscPosJob({
   if (order.payments.length > 0) {
     w.rule();
     for (const p of order.payments) {
-      w.row(`Paid (${p.method})`, money(p.amount));
+      w.row(`Paid (${paymentMethodLabel(p.method)})`, money(p.amount));
       if (p.tendered != null && p.changeGiven != null && p.changeGiven > 0) {
         w.row(`  Received`, money(p.tendered));
         w.row(`  Change`, money(p.changeGiven));

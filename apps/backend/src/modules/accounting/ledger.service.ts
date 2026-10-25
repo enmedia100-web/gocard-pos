@@ -46,7 +46,7 @@ function toIsoDate(raw: string): string | null {
 
 const num = (raw: string | undefined) => {
   if (!raw) return 0;
-  const n = Number(raw.replace(/[,₹$\s]/g, ''));
+  const n = Number(raw.replace(/[,₹৳$\s]/g, ''));
   return Number.isFinite(n) ? n : 0;
 };
 
@@ -398,7 +398,17 @@ export class LedgerService {
           order: { branchId },
           createdAt: { lte: end },
           method: {
-            in: ['CASH', 'CARD', 'UPI', 'WALLET', 'BANK_TRANSFER', 'OTHER'],
+            in: [
+              'CASH',
+              'CARD',
+              'UPI',
+              'BKASH',
+              'NAGAD',
+              'ROCKET',
+              'WALLET',
+              'BANK_TRANSFER',
+              'OTHER',
+            ],
           },
         },
         _sum: { amount: true },

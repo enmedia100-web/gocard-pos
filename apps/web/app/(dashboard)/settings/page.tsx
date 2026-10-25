@@ -4,8 +4,11 @@ import { ImagePlus, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
+  COUNTRY_DEFAULTS,
+  CURRENCY_SYMBOLS,
   RESTAURANT_NAME_MAX_LENGTH,
   TAX_REGIME_PRESETS,
+  countryDefaults,
   TAX_REGIMES,
   type TaxMode,
   type TaxRegime,
@@ -196,6 +199,9 @@ function GeneralSettingsForm({
   const [taxId, setTaxId] = useState(branch.taxId ?? "");
 
   const preset = TAX_REGIME_PRESETS[taxRegime];
+  const countryPreset = countryDefaults(country);
+  const currencyOptions = Array.from(new Set([currency, ...Object.keys(CURRENCY_SYMBOLS)]));
+  const countryOptions = Array.from(new Set([...Object.keys(COUNTRY_DEFAULTS), country]));
 
   const updateRestaurant = useUpdateRestaurantSettings(branchId);
   const updateBranch = useUpdateBranchSettings(branchId);
@@ -330,13 +336,23 @@ function GeneralSettingsForm({
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="r-currency">Currency</Label>
-              <Input
-                id="r-currency"
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-                maxLength={3}
-                required
-              />
+              <Select value={currency} onValueChange={(v) => v && setCurrency(v)}>
+                <SelectTrigger id="r-currency">
+                  <SelectValue>{CURRENCY_SYMBOLS[currency] ? `${CURRENCY_SYMBOLS[currency]} ${currency}` : currency}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyOptions.map((code) => (
+                    <SelectItem key={code} value={code}>
+                      {CURRENCY_SYMBOLS[code] ? `${CURRENCY_SYMBOLS[code]} ${code}` : code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {currency !== countryPreset.currency && (
+                <p className="text-xs text-muted-foreground">
+                  {countryPreset.displayName} normally uses {countryPreset.currency}.
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="r-timezone">Timezone</Label>
@@ -383,31 +399,34 @@ function GeneralSettingsForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-upi">UPI id (for QR payments)</Label>
-              <Input
-                id="r-upi"
-                value={upiVpa}
-                onChange={(e) => setUpiVpa(e.target.value)}
-                placeholder="yourshop@okbank"
-                autoComplete="off"
-              />
-              <p className="text-xs text-muted-foreground">
-                Shown as a scannable QR at checkout and on the customer display, with the exact bill amount filled in.
-              </p>
+          {/* UPI is India-only; hidden elsewhere unless one was already saved. */}
+          {(country === "IN" || upiVpa) && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="r-upi">UPI id (for QR payments)</Label>
+                <Input
+                  id="r-upi"
+                  value={upiVpa}
+                  onChange={(e) => setUpiVpa(e.target.value)}
+                  placeholder="yourshop@okbank"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Shown as a scannable QR at checkout and on the customer display, with the exact bill amount filled in.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="r-upi-name">UPI payee name</Label>
+                <Input
+                  id="r-upi-name"
+                  value={upiPayeeName}
+                  onChange={(e) => setUpiPayeeName(e.target.value)}
+                  placeholder={name}
+                  maxLength={60}
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-upi-name">UPI payee name</Label>
-              <Input
-                id="r-upi-name"
-                value={upiPayeeName}
-                onChange={(e) => setUpiPayeeName(e.target.value)}
-                placeholder={name}
-                maxLength={60}
-              />
-            </div>
-          </div>
+          )}
 
           <Button type="submit" disabled={updateRestaurant.isPending} className="self-start">
             {updateRestaurant.isPending ? "Saving…" : "Save restaurant"}
@@ -431,10 +450,12 @@ function GeneralSettingsForm({
               <Label htmlFor="b-phone">Phone</Label>
               <Input id="b-phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="b-gst">GST number (legacy)</Label>
-              <Input id="b-gst" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} />
-            </div>
+            {(taxRegime === "INDIA_GST" || gstNumber) && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="b-gst">GST number (legacy)</Label>
+                <Input id="b-gst" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2 border-t border-border pt-4">
@@ -448,7 +469,7 @@ function GeneralSettingsForm({
               <Label htmlFor="b-tax-regime">Region / regime</Label>
               <Select value={taxRegime} onValueChange={onRegimeChange}>
                 <SelectTrigger id="b-tax-regime">
-                  <SelectValue />
+                  <SelectValue>{preset.displayName}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {TAX_REGIMES.map((regime) => (
@@ -463,7 +484,9 @@ function GeneralSettingsForm({
               <Label htmlFor="b-tax-mode">Menu prices are</Label>
               <Select value={taxMode} onValueChange={(v) => setTaxMode(v as TaxMode)}>
                 <SelectTrigger id="b-tax-mode">
-                  <SelectValue />
+                  <SelectValue>
+                    {taxMode === "EXCLUSIVE" ? "Tax-exclusive" : "Tax-inclusive"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="INCLUSIVE">Tax-inclusive</SelectItem>
@@ -477,13 +500,22 @@ function GeneralSettingsForm({
           </p>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="b-country">Country code</Label>
-              <Input
-                id="b-country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value.toUpperCase())}
-                maxLength={2}
-              />
+              <Label htmlFor="b-country">Country</Label>
+              <Select value={country} onValueChange={(v) => v && setCountry(v)}>
+                <SelectTrigger id="b-country">
+                  <SelectValue>{countryPreset.displayName}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {countryOptions.map((code) => (
+                    <SelectItem key={code} value={code}>
+                      {countryDefaults(code).displayName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Sets the payment methods offered at checkout.
+              </p>
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="b-tax-id">{TAX_REGIME_PRESETS[taxRegime].taxIdLabel}</Label>

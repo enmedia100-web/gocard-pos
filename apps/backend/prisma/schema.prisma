@@ -21,6 +21,7 @@ datasource db {
 // see taxRegimes.ts. CUSTOM means every one of those is taken from the
 // branch's own taxLabel/taxMode instead of the preset.
 enum TaxRegime {
+  BD_VAT
   INDIA_GST
   US_SALES_TAX
   EU_VAT
@@ -49,8 +50,8 @@ model Restaurant {
   // white-label self-hosted software, so the operator's brand should lead;
   // the product name stays as a small credit line instead (see BrandFooter).
   logoUrl   String?
-  currency  String  @default("INR")
-  timezone  String  @default("Asia/Kolkata")
+  currency  String  @default("BDT")
+  timezone  String  @default("Asia/Dhaka")
 
   // UPI payee for the dynamic QR shown at checkout and on the customer
   // display (NPCI deep link, see apps/web/lib/upi.ts). Optional: when unset
@@ -114,9 +115,9 @@ model Branch {
   // is kept as the India-specific field pre-existing installs already
   // populated and remains the fallback when taxRegime is INDIA_GST and
   // taxId is empty.
-  country   String    @default("IN")
-  taxRegime TaxRegime @default(INDIA_GST)
-  taxMode   TaxMode   @default(INCLUSIVE)
+  country   String    @default("BD")
+  taxRegime TaxRegime @default(BD_VAT)
+  taxMode   TaxMode   @default(EXCLUSIVE)
   taxLabel  String?
   taxId     String?
 
@@ -1493,6 +1494,9 @@ enum PaymentMethod {
   CASH
   CARD
   UPI
+  BKASH
+  NAGAD
+  ROCKET
   WALLET
   BANK_TRANSFER
   GIFT_CARD

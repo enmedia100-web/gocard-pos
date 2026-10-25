@@ -1,6 +1,12 @@
 "use client";
 
-import { kitchenProgress, type PaymentMethodDto } from "@nodedr-restaurant/types";
+import {
+  kitchenProgress,
+  paymentMethodLabel,
+  paymentMethodsFor,
+  resolveTaxLabel,
+  type PaymentMethodDto,
+} from "@nodedr-restaurant/types";
 import { ArrowLeft, CheckCircle2, ChefHat, Pencil, Printer } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -35,8 +41,6 @@ import { buildUpiUri } from "@/lib/upi";
 import { QRCodeSVG } from "qrcode.react";
 import { openKotPrint, openReceiptPrint } from "@/lib/print";
 import { round2 } from "@/lib/pricing-preview";
-
-const METHODS: PaymentMethodDto[] = ["CASH", "CARD", "UPI", "OTHER"];
 
 const KITCHEN_LABEL: Record<string, string> = {
   NEW: "Waiting for the kitchen",
@@ -130,6 +134,9 @@ export function CheckoutPanel({
     );
   const [completed, setCompleted] = useState<CheckoutResult | null>(null);
   const { data: settings } = useSettings(branchId);
+  // Counter methods follow the branch's country: bKash/Nagad/Rocket in
+  // Bangladesh, UPI only in India.
+  const methods = paymentMethodsFor(settings?.branch.country);
 
   // What the guest has typed in, as numbers. Once a payment has been taken the
   // server locks the figures, so these stop mattering (and are not sent).
@@ -448,7 +455,7 @@ export function CheckoutPanel({
           <ul className="mt-1 flex flex-col gap-0.5 text-sm">
             {paidSoFar.map((p) => (
               <li key={p.id} className="flex justify-between tabular-nums">
-                <span>{p.method}</span>
+                <span>{paymentMethodLabel(p.method)}</span>
                 <span>{formatCurrency(p.amount)}</span>
               </li>
             ))}
@@ -586,7 +593,7 @@ export function CheckoutPanel({
           {remainingDue > 0 && (
             <div className="flex flex-col gap-2">
               <Label>Payment method</Label>
-              <PaymentMethodButtons methods={METHODS} value={method} onChange={setMethod} />
+              <PaymentMethodButtons methods={methods} value={method} onChange={setMethod} />
             </div>
           )}
 
@@ -616,7 +623,7 @@ export function CheckoutPanel({
               )}
               {plan.clamped && (
                 <p className="text-xs text-muted-foreground" role="status">
-                  {method} can only pay the balance ({formatCurrency(remainingDue)}); only that will be charged.
+                  {paymentMethodLabel(method)} can only pay the balance ({formatCurrency(remainingDue)}); only that will be charged.
                 </p>
               )}
             </div>
@@ -666,7 +673,13 @@ export function CheckoutPanel({
       )}
 
       <div className="mt-auto flex flex-col gap-3 border-t border-border pt-4">
-        <BillSummary bill={bill} giftCardApplied={giftCardApplied} pending={repricing || billQuery.isFetching} />
+        <BillSummary
+          bill={bill}
+          giftCardApplied={giftCardApplied}
+          pending={repricing || billQuery.isFetching}
+          taxExclusive={settings?.branch.taxMode === "EXCLUSIVE"}
+          taxLabel={settings ? resolveTaxLabel(settings.branch.taxRegime, settings.branch.taxLabel) : "Tax"}
+        />
 
         <div className="grid grid-cols-2 gap-2">
           <Button
@@ -716,10 +729,15 @@ function BillSummary({
   bill,
   giftCardApplied,
   pending,
+  taxExclusive,
+  taxLabel,
 }: {
   bill: BillPreview | undefined;
   giftCardApplied: number;
   pending: boolean;
+  /** Tax is added on top of menu prices (Bangladesh VAT, US sales tax), as on the printed receipt. */
+  taxExclusive: boolean;
+  taxLabel: string;
 }) {
   if (!bill) {
     return <p className="text-sm text-muted-foreground">Pricing the bill…</p>;
@@ -734,7 +752,12 @@ function BillSummary({
   return (
     <div className={pending ? "opacity-70" : undefined} aria-busy={pending}>
       <dl className="flex flex-col gap-1 text-sm">
-        <Row label="Subtotal" value={formatCurrency(bill.subtotal)} />
+        {/* bill.subtotal always has tax inside it (see pricing.ts); with tax
+            added on top, show the pre-tax figure and tax as its own line. */}
+        <Row
+          label="Subtotal"
+          value={formatCurrency(taxExclusive ? round2(bill.subtotal - bill.taxAmount) : bill.subtotal)}
+        />
         {bill.discountAmount > 0 && (
           <Row
             label={`Discount${source ? ` (${source})` : ""}`}
@@ -742,7 +765,11 @@ function BillSummary({
             accent
           />
         )}
-        <Row label="Tax (included)" value={formatCurrency(bill.taxAmount)} muted />
+        {taxExclusive ? (
+          <Row label={taxLabel} value={formatCurrency(bill.taxAmount)} />
+        ) : (
+          <Row label={`${taxLabel} (included)`} value={formatCurrency(bill.taxAmount)} muted />
+        )}
         {bill.loyaltyDiscountAmount > 0 && (
           <Row
             label={`Loyalty (${bill.loyaltyPointsRedeemed} pts)`}

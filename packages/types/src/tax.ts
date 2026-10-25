@@ -11,6 +11,7 @@ export const TAX_MODES = ["INCLUSIVE", "EXCLUSIVE"] as const;
 export type TaxMode = (typeof TAX_MODES)[number];
 
 export const TAX_REGIMES = [
+  "BD_VAT",
   "INDIA_GST",
   "US_SALES_TAX",
   "EU_VAT",
@@ -38,6 +39,20 @@ export interface TaxRegimePreset {
 }
 
 export const TAX_REGIME_PRESETS: Record<TaxRegime, TaxRegimePreset> = {
+  // Bangladesh VAT (GoCard, 2026-10-26). Restaurant rates are set by the NBR
+  // by restaurant type and change from budget to budget, so no rate is
+  // assumed here: each menu item carries its own. Menu prices in Bangladesh
+  // are usually quoted before VAT, which is added on the bill.
+  BD_VAT: {
+    regime: "BD_VAT",
+    displayName: "Bangladesh — VAT",
+    defaultMode: "EXCLUSIVE",
+    taxLabel: "VAT",
+    taxIdLabel: "BIN",
+    splitCgstSgst: false,
+    exampleRates: "Set by the NBR for your restaurant type — check the current rate",
+    defaultCountry: "BD",
+  },
   INDIA_GST: {
     regime: "INDIA_GST",
     displayName: "India — GST",
@@ -86,7 +101,7 @@ export const TAX_REGIME_PRESETS: Record<TaxRegime, TaxRegimePreset> = {
     taxIdLabel: "Tax ID",
     splitCgstSgst: false,
     exampleRates: "Set per menu item",
-    defaultCountry: "IN",
+    defaultCountry: "BD",
   },
 };
 

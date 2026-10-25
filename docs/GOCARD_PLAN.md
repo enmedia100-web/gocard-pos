@@ -29,17 +29,26 @@ then the **United States** (Stripe, US dollars, sales tax).
   updater targets and install packages to GoCard.
 - `NOTICE` with upstream attribution; a "Source code" link in the app (AGPL §13).
 
-### Phase 1 — Bangladesh basics
-- Country preset `BD`: currency `BDT` (৳, two decimals), time zone
-  Asia/Dhaka, phone format +880 1XXXXXXXXX, Bangla number formatting option.
-- Tax regime `BD_VAT`: VAT label "VAT", BIN (business identification number)
-  as the tax id, configurable rate (restaurants commonly 5–15%; set per branch,
-  never hard-coded), inclusive or exclusive, supplementary duty field for
-  later; Mushak-6.3-style receipt layout as a follow-up.
-- Payment methods: add `BKASH`, `NAGAD`, `ROCKET` (recorded manually at the
-  counter); `UPI` hidden outside India.
-- Default seed and onboarding for a Bangladesh restaurant; India-only docs
-  and Spain Verifactu screens hidden unless the branch is in those countries.
+### Phase 1 — Bangladesh basics (done 2026-10-26)
+- New installs default to Bangladesh: currency `BDT`, time zone Asia/Dhaka,
+  country `BD`, tax regime `BD_VAT` (label "VAT", tax number "BIN",
+  prices tax-exclusive — VAT added on the bill). No rate is assumed; each
+  menu item carries its own, as the NBR rate depends on restaurant type.
+- Per-country defaults live in `packages/types/src/region.ts`: currency,
+  time zone, regime and the counter payment methods offered at checkout.
+- Payment methods `BKASH`, `NAGAD`, `ROCKET` (recorded at the counter after
+  the guest pays the merchant number). Counted as cash-in by the ledger.
+  UPI is offered only when the branch country is India.
+- Money shows in the restaurant's currency everywhere: `formatCurrency`
+  follows the restaurant setting (`CurrencyScope` in the app shell), taka
+  uses lakh grouping (৳12,34,567.50). Receipts print ৳ on screen and "Tk"
+  on thermal printers (no ৳ glyph in printer code pages).
+- Checkout, cart and the guest QR menu say "before VAT" / "VAT is added to
+  the bill" when prices are tax-exclusive.
+- Demo seed is a Dhaka restaurant priced in taka.
+- Follow-ups: record the bKash/Nagad transaction ID with each payment;
+  show the merchant number as a QR at checkout; Mushak-6.3 receipt layout;
+  supplementary duty field.
 
 ### Phase 2 — Bangla
 - `bn` dictionary; move the staff screens' hard-coded English (about 160

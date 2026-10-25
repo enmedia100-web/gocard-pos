@@ -1,5 +1,6 @@
 "use client";
 
+import { resolveTaxLabel } from "@nodedr-restaurant/types";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CartLine } from "@/components/pos/cart-line";
+import { useBranch } from "@/hooks/use-branch";
+import { useSettings } from "@/hooks/use-settings";
 import type { RestaurantTable } from "@/hooks/use-tables";
 import { formatCurrency } from "@/lib/format";
 import { subtotalOf } from "@/lib/pricing-preview";
@@ -71,6 +74,15 @@ export function CartPanel({
   onScheduledForChange: (v: string) => void;
 }) {
   const subtotal = subtotalOf(lines.map((l) => l.unitPrice * l.quantity));
+  // Menu prices already include tax (India) or have it added on the bill
+  // (Bangladesh VAT, US sales tax); the label says which this total is.
+  const { branchId } = useBranch();
+  const { data: settings } = useSettings(branchId);
+  const branch = settings?.branch;
+  const subtotalLabel =
+    branch?.taxMode === "EXCLUSIVE"
+      ? `Subtotal (before ${resolveTaxLabel(branch.taxRegime, branch.taxLabel)})`
+      : "Subtotal (incl. tax)";
   const deliveryReady =
     orderType !== "DELIVERY" ||
     (delivery.address.trim().length >= 5 && delivery.pincode.trim().length >= 3 && delivery.phone.trim().length >= 6);
@@ -247,7 +259,7 @@ export function CartPanel({
 
       <div className="flex flex-col gap-3 border-t border-border pt-4">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Subtotal (incl. tax)</span>
+          <span className="text-muted-foreground">{subtotalLabel}</span>
           <span className="font-semibold tabular-nums text-foreground">
             {formatCurrency(subtotal)}
           </span>

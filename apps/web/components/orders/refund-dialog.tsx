@@ -1,7 +1,7 @@
 "use client";
 
 import { PaymentMethodButtons } from "@/components/pos/payment-method-buttons";
-import type { PaymentMethodDto } from "@nodedr-restaurant/types";
+import { paymentMethodsFor, type PaymentMethodDto } from "@nodedr-restaurant/types";
 import { RotateCcw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,9 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRefundOrder } from "@/hooks/use-orders";
+import { useSettings } from "@/hooks/use-settings";
 import { api, ApiError } from "@/lib/api";
-
-const METHODS: PaymentMethodDto[] = ["CASH", "CARD", "UPI", "OTHER", "STORE_CREDIT"];
 
 export function RefundDialog({
   branchId,
@@ -38,6 +37,8 @@ export function RefundDialog({
   const [method, setMethod] = useState<PaymentMethodDto>("CASH");
   const [reason, setReason] = useState("");
   const refund = useRefundOrder(branchId);
+  const { data: settings } = useSettings(branchId);
+  const methods: PaymentMethodDto[] = [...paymentMethodsFor(settings?.branch.country), "STORE_CREDIT"];
   // Units physically handed back; only these go back into stock.
   const [returned, setReturned] = useState<Record<string, number>>({});
   const { data: order } = useQuery({
@@ -100,7 +101,7 @@ export function RefundDialog({
           </div>
           <div className="flex flex-col gap-2">
             <Label>Refund method</Label>
-            <PaymentMethodButtons methods={METHODS} value={method} onChange={setMethod} label="Refund method" />
+            <PaymentMethodButtons methods={methods} value={method} onChange={setMethod} label="Refund method" />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="refund-reason">Reason (optional)</Label>

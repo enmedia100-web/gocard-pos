@@ -1,5 +1,6 @@
 "use client";
 
+import { paymentMethodsFor, type PaymentMethodDto } from "@nodedr-restaurant/types";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,10 +16,9 @@ import { Input } from "@/components/ui/input";
 import { PaymentMethodButtons } from "@/components/pos/payment-method-buttons";
 import { Label } from "@/components/ui/label";
 import { useRecordSupplierPayment, type SupplierInvoice } from "@/hooks/use-inventory";
+import { useSettings } from "@/hooks/use-settings";
 import { ApiError } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
-
-const METHODS = ["CASH", "CARD", "UPI", "BANK_TRANSFER", "WALLET", "OTHER"] as const;
 
 export function RecordPaymentDialog({
   branchId,
@@ -30,9 +30,16 @@ export function RecordPaymentDialog({
   const [open, setOpen] = useState(false);
   const remaining = Number(invoice.totalAmount) - Number(invoice.amountPaid);
   const [amount, setAmount] = useState(() => String(remaining));
-  const [method, setMethod] = useState<(typeof METHODS)[number]>("CASH");
+  const [method, setMethod] = useState<PaymentMethodDto>("CASH");
   const [reference, setReference] = useState("");
   const recordPayment = useRecordSupplierPayment(branchId);
+  const { data: settings } = useSettings(branchId);
+  // Suppliers are paid the same ways as the country's counter methods, plus bank transfer.
+  const methods: PaymentMethodDto[] = [
+    ...paymentMethodsFor(settings?.branch.country).filter((m) => m !== "OTHER"),
+    "BANK_TRANSFER",
+    "OTHER",
+  ];
 
   const canSubmit = Number(amount) > 0 && Number(amount) <= remaining;
 
@@ -84,7 +91,7 @@ export function RecordPaymentDialog({
 
           <div className="flex flex-col gap-2">
             <Label>Method</Label>
-            <PaymentMethodButtons methods={METHODS} value={method} onChange={setMethod} label="Payment method" />
+            <PaymentMethodButtons methods={methods} value={method} onChange={setMethod} label="Payment method" />
           </div>
 
           <div className="flex flex-col gap-2">

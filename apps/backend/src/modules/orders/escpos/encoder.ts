@@ -79,6 +79,7 @@ const LOOKALIKES: Record<string, string> = {
   '…': '...',
   '•': '*',
   '₹': 'Rs.',
+  '৳': 'Tk',
   ' ': ' ',
 };
 

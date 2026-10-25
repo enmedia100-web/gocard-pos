@@ -28,8 +28,8 @@ tutorial and design-system documents are still accurate for the code.
 | Area | State |
 |---|---|
 | Rebrand to GoCard, updates and images from this repo | Done |
-| Taka, Bangladesh VAT, bKash/Nagad/Rocket counter payments | Next |
-| Bangla interface and receipts | Planned |
+| Taka, Bangladesh VAT, bKash/Nagad/Rocket counter payments | Done |
+| Bangla interface and receipts | Next |
 | Online payments: SSLCommerz, bKash checkout, then Stripe | Planned |
 
 ## Quick start (Docker)

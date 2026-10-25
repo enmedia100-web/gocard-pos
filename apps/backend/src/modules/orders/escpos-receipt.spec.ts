@@ -151,6 +151,27 @@ describe('receipt job', () => {
     expect(text).not.toContain('?');
   });
 
+  it('prints taka as "Tk" with the VAT label and BIN for a Bangladesh branch', () => {
+    const job = buildReceiptEscPosJob({
+      restaurantName: 'GoCard Kitchen',
+      currency: 'BDT',
+      branch: {
+        ...branch,
+        taxRegime: 'BD_VAT' as const,
+        taxMode: 'EXCLUSIVE' as const,
+        taxId: '000123456-0101',
+      },
+      order,
+      profile: resolveProfile({ codepage: 'CP437' }),
+      ...fmt,
+    });
+    const { text } = readJob(job.buffer, 'CP437');
+    expect(text).toContain('Tk 31.40');
+    expect(text).toContain('VAT');
+    expect(text).toContain('BIN');
+    expect(job.unsupportedChars).toEqual([]);
+  });
+
   it('flags unprintable item names instead of silently mangling them', () => {
     const job = buildReceiptEscPosJob({
       restaurantName: 'Casa',

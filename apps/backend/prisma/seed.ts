@@ -11,7 +11,9 @@ import {
 // install.sh packaging notes), so `src/` doesn't exist to import from once
 // this script runs via a container's `npx ts-node prisma/seed.ts`. Same
 // tax-inclusive math as OrdersService.priceLine, kept tiny and duplicated
-// on purpose rather than reaching across that packaging boundary.
+// on purpose rather than reaching across that packaging boundary. The demo
+// branch is Bangladesh (VAT added on top, EXCLUSIVE), so menu prices are
+// grossed up first, as toEffectiveInclusiveUnitPrice does.
 function round2(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
@@ -46,8 +48,9 @@ async function main() {
     update: {},
     create: {
       id: 'demo-restaurant',
-      name: 'Nodedr Bistro (Demo)',
-      currency: 'INR',
+      name: 'GoCard Kitchen (Demo)',
+      currency: 'BDT',
+      timezone: 'Asia/Dhaka',
     },
   });
 
@@ -57,8 +60,11 @@ async function main() {
     create: {
       id: 'demo-branch',
       restaurantId: restaurant.id,
-      name: 'Main Branch',
-      address: '123 Demo Street',
+      name: 'Gulshan Branch',
+      address: 'Road 11, Gulshan 2, Dhaka',
+      country: 'BD',
+      taxRegime: 'BD_VAT',
+      taxMode: 'EXCLUSIVE',
     },
   });
 
@@ -245,16 +251,16 @@ async function main() {
   }[] = [
     {
       id: 'demo-item-paneer-tikka',
-      name: 'Paneer Tikka',
+      name: 'Vegetable Pakora',
       categoryId: starters.id,
       stationId: mainKitchen.id,
-      price: 280,
+      price: 180,
       taxRatePercent: 5,
       isVeg: true,
     },
     {
       id: 'demo-item-chicken-65',
-      name: 'Chicken 65',
+      name: 'Chicken Tikka',
       categoryId: starters.id,
       stationId: mainKitchen.id,
       price: 320,
@@ -266,27 +272,27 @@ async function main() {
       name: 'Margherita Pizza',
       categoryId: mains.id,
       stationId: mainKitchen.id,
-      price: 420,
+      price: 650,
       taxRatePercent: 5,
       isVeg: true,
       modifierGroupId: crustGroup.id,
     },
     {
       id: 'demo-item-butter-chicken',
-      name: 'Butter Chicken',
+      name: 'Kacchi Biryani',
       categoryId: mains.id,
       stationId: mainKitchen.id,
-      price: 480,
+      price: 450,
       taxRatePercent: 5,
       isVeg: false,
     },
     {
       id: 'demo-item-mojito',
-      name: 'Virgin Mojito',
+      name: 'Borhani',
       categoryId: drinks.id,
       stationId: bar.id,
-      price: 220,
-      taxRatePercent: 18,
+      price: 80,
+      taxRatePercent: 5,
       isVeg: true,
     },
     {
@@ -294,8 +300,8 @@ async function main() {
       name: 'Coca-Cola',
       categoryId: drinks.id,
       stationId: bar.id,
-      price: 90,
-      taxRatePercent: 18,
+      price: 50,
+      taxRatePercent: 5,
       isVeg: true,
     },
   ];
@@ -360,8 +366,9 @@ async function main() {
   for (const demoOrder of demoOrders) {
     const lines = demoOrder.lines.map((line) => {
       const item = itemById.get(line.itemId)!;
-      const priced = priceLine(line.quantity, item.price, item.taxRatePercent);
-      return { item, quantity: line.quantity, priced };
+      const unitPrice = round2(item.price * (1 + item.taxRatePercent / 100));
+      const priced = priceLine(line.quantity, unitPrice, item.taxRatePercent);
+      return { item, quantity: line.quantity, unitPrice, priced };
     });
     const subtotal = round2(
       lines.reduce((sum, l) => sum + l.priced.lineTotal, 0),
@@ -401,7 +408,7 @@ async function main() {
           orderId: order.id,
           menuItemId: line.item.id,
           nameSnapshot: line.item.name,
-          unitPriceSnapshot: line.item.price,
+          unitPriceSnapshot: line.unitPrice,
           taxRateSnapshot: line.item.taxRatePercent,
           quantity: line.quantity,
           lineTotal: line.priced.lineTotal,
