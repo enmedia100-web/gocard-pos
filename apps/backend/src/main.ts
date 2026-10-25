@@ -123,8 +123,8 @@ async function bootstrap() {
     process.env.ENABLE_SWAGGER === 'true'
   ) {
     const config = new DocumentBuilder()
-      .setTitle('Nodedr OrderRestro API')
-      .setDescription('REST API for the Nodedr OrderRestro management system')
+      .setTitle('GoCard POS API')
+      .setDescription('REST API for the GoCard POS management system')
       .setVersion('1.0')
       .addCookieAuth('nodedr_session')
       .build();
@@ -135,7 +135,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 4000;
   await app.listen(port);
   console.log(
-    `Nodedr OrderRestro API listening on :${port} (docs at /api/docs)`,
+    `GoCard POS API listening on :${port} (docs at /api/docs)`,
   );
 }
 void bootstrap();

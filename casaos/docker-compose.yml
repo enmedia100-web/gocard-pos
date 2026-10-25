@@ -23,9 +23,9 @@ services:
       - nodedr-restaurant-pos
 
   backend:
-    image: ghcr.io/raktim94/nodedr-restaurant-pos-backend:1.8.2
-    container_name: nodedr-restaurant-pos-backend
-    hostname: nodedr-restaurant-pos-backend
+    image: ghcr.io/enmedia100-web/gocard-pos-backend:1.8.2
+    container_name: gocard-pos-backend
+    hostname: gocard-pos-backend
     restart: unless-stopped
     environment:
       DATABASE_URL: "postgresql://nodedr:please-change-this-password@nodedr-restaurant-pos-postgres:5432/nodedr_restaurant"
@@ -45,8 +45,8 @@ services:
       # Spain VERI*FACTU producer identifier (see docs/verifactu.md). Only needed for Spanish installs.
       VERIFACTU_PRODUCER_ID: ""
       # In-app "Update now" button (Settings > Updates) -> the updater below.
-      UPDATER_URL: "http://nodedr-restaurant-pos-updater:8080"
-      UPDATER_TOKEN: "nodedr-restaurant-updater"
+      UPDATER_URL: "http://gocard-pos-updater:8080"
+      UPDATER_TOKEN: "gocard-pos-updater"
     volumes:
       - type: bind
         source: /DATA/AppData/$AppID/uploads
@@ -82,9 +82,9 @@ services:
             en_US: Auto-generated login security key. Created automatically on first launch — leave it alone.
 
   web:
-    image: ghcr.io/raktim94/nodedr-restaurant-pos-web:1.8.2
-    container_name: nodedr-restaurant-pos-web
-    hostname: nodedr-restaurant-pos-web
+    image: ghcr.io/enmedia100-web/gocard-pos-web:1.8.2
+    container_name: gocard-pos-web
+    hostname: gocard-pos-web
     restart: unless-stopped
     ports:
       - target: 3000
@@ -98,22 +98,22 @@ services:
       ports:
         - container: "3000"
           description:
-            en_US: Nodedr OrderRestro web interface
+            en_US: GoCard POS web interface
           protocol: tcp
 
-  # In-app "Update now" (Settings > Updates): pulls the newer OrderRestro
+  # In-app "Update now" (Settings > Updates): pulls the newer GoCard POS
   # images above and recreates those two containers (nothing else). Needs the
   # Docker socket to do that; data in /DATA/AppData is untouched. The updater
   # image is generic (it only manages the containers named below), so the
   # one published for NodeDR POS is reused.
   updater:
     image: ghcr.io/raktim94/nodedr-pos-updater:1.5.1
-    container_name: nodedr-restaurant-pos-updater
-    hostname: nodedr-restaurant-pos-updater
+    container_name: gocard-pos-updater
+    hostname: gocard-pos-updater
     restart: unless-stopped
     environment:
-      UPDATER_TOKEN: "nodedr-restaurant-updater"
-      TARGET_CONTAINERS: "nodedr-restaurant-pos-backend,nodedr-restaurant-pos-web"
+      UPDATER_TOKEN: "gocard-pos-updater"
+      TARGET_CONTAINERS: "gocard-pos-backend,gocard-pos-web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -122,7 +122,7 @@ services:
       volumes:
         - container: /var/run/docker.sock
           description:
-            en_US: Docker socket, used only by the in-app "Update now" button to move the two OrderRestro containers to a newer version.
+            en_US: Docker socket, used only by the in-app "Update now" button to move the two GoCard POS containers to a newer version.
 
 networks:
   nodedr-restaurant-pos:
@@ -137,19 +137,19 @@ x-casaos:
   author: Nodedr Infotech Private Limited
   developer: Raktim94
   category: Finance
-  icon: https://cdn.jsdelivr.net/gh/Raktim94/nodedr-restaurant-pos@master/casaos/icon.png
-  thumbnail: https://cdn.jsdelivr.net/gh/Raktim94/nodedr-restaurant-pos@master/casaos/thumbnail.png
+  icon: https://cdn.jsdelivr.net/gh/enmedia100-web/gocard-pos@master/casaos/icon.png
+  thumbnail: https://cdn.jsdelivr.net/gh/enmedia100-web/gocard-pos@master/casaos/thumbnail.png
   screenshot_link:
-    - https://cdn.jsdelivr.net/gh/Raktim94/nodedr-restaurant-pos@master/casaos/screenshot-1.png
-    - https://cdn.jsdelivr.net/gh/Raktim94/nodedr-restaurant-pos@master/casaos/screenshot-2.png
-    - https://cdn.jsdelivr.net/gh/Raktim94/nodedr-restaurant-pos@master/casaos/screenshot-3.png
+    - https://cdn.jsdelivr.net/gh/enmedia100-web/gocard-pos@master/casaos/screenshot-1.png
+    - https://cdn.jsdelivr.net/gh/enmedia100-web/gocard-pos@master/casaos/screenshot-2.png
+    - https://cdn.jsdelivr.net/gh/enmedia100-web/gocard-pos@master/casaos/screenshot-3.png
   title:
-    en_US: Nodedr OrderRestro
+    en_US: GoCard POS
   tagline:
     en_US: Offline-first restaurant management — POS, kitchen display, tables, and reservations
   description:
     en_US: |
-      Nodedr OrderRestro is a free, open-source restaurant management system:
+      GoCard POS is a free, open-source restaurant management system:
       point-of-sale ordering, a live kitchen display (KDS) split by station,
       table/floor management with QR-code table ordering, reservations and a
       waitlist, inventory with automatic ingredient deduction, customer CRM
@@ -219,6 +219,6 @@ x-casaos:
       management with QR ordering, reservations, inventory, customer
       loyalty/CRM, and billing.
   website: "https://orderrestro.nodedr.com/"
-  repo: "https://github.com/Raktim94/nodedr-restaurant-pos"
+  repo: "https://github.com/enmedia100-web/gocard-pos"
   support: "https://orderrestro.nodedr.com/contact"
-  docs: "https://github.com/Raktim94/nodedr-restaurant-pos#readme"
+  docs: "https://github.com/enmedia100-web/gocard-pos#readme"

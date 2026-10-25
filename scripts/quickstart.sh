@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Nodedr OrderRestro quickstart — macOS & Linux.
+# GoCard POS quickstart — macOS & Linux.
 #
 # Checks whether Docker is installed and running; installs it if not
 # (Docker Desktop via Homebrew on macOS, Docker Engine via the official
@@ -9,14 +9,14 @@
 # installer (which generates a .env with random secrets on first run).
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/Raktim94/nodedr-restaurant-pos/master/scripts/quickstart.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/enmedia100-web/gocard-pos/master/scripts/quickstart.sh | bash
 #
 # Safe to re-run: every step only acts if the previous one didn't already
 # succeed, and an existing ./nodedr-restaurant-pos checkout is updated in
 # place rather than clobbered.
 set -euo pipefail
 
-REPO_URL="https://github.com/Raktim94/nodedr-restaurant-pos.git"
+REPO_URL="https://github.com/enmedia100-web/gocard-pos.git"
 REPO_DIR="nodedr-restaurant-pos"
 SUDO=""
 
@@ -130,5 +130,5 @@ else
 fi
 
 cd "$REPO_DIR"
-echo "==> Installing and starting Nodedr OrderRestro..."
+echo "==> Installing and starting GoCard POS..."
 $SUDO ./install.sh

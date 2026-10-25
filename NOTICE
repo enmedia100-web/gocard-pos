@@ -1,0 +1,20 @@
+GoCard POS
+Copyright (C) 2026 GoCard BD
+
+This program is a modified version of Nodedr OrderRestro
+(https://github.com/Raktim94/nodedr-restaurant-pos),
+Copyright (C) 2026 Nodedr Infotech Private Limited and Raktim Ranjit.
+
+Both the original work and this modified version are licensed under the
+GNU Affero General Public License, version 3 (see LICENSE). This program is
+distributed WITHOUT ANY WARRANTY; see the licence for details.
+
+Modifications by GoCard BD include rebranding and adaptation for Bangladesh
+(currency, language, payments and tax). The complete corresponding source of
+every GoCard POS release, hosted or installed, is published at:
+
+  https://github.com/enmedia100-web/gocard-pos
+
+Under section 13 of the licence, anyone who interacts with a modified version
+of GoCard POS over a network must be offered that version's source code.
+The "Source code" link in the app points there; keep it working in any fork.

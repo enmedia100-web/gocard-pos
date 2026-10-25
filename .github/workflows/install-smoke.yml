@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: One-line install (as published)
         working-directory: ${{ runner.temp }}
-        run: curl -fsSL https://raw.githubusercontent.com/Raktim94/nodedr-restaurant-pos/master/scripts/quickstart.sh | bash
+        run: curl -fsSL https://raw.githubusercontent.com/enmedia100-web/gocard-pos/master/scripts/quickstart.sh | bash
 
       - name: App answers on port 1995
         run: |

@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: nodedr-restaurant-postgres
+    container_name: gocard-pos-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: nodedr
@@ -30,8 +30,8 @@ services:
     # Same name CI publishes. `up --build` tags the local build with it, and
     # the in-app "Update now" button (see the `updater` service below) pulls
     # the published image of a newer version under it.
-    image: ghcr.io/raktim94/nodedr-restaurant-pos-backend:${APP_VERSION:-dev}
-    container_name: nodedr-restaurant-backend
+    image: ghcr.io/enmedia100-web/gocard-pos-backend:${APP_VERSION:-dev}
+    container_name: gocard-pos-backend
     restart: unless-stopped
     environment:
       DATABASE_URL: "postgresql://nodedr:${POSTGRES_PASSWORD:-nodedr_dev_pw}@postgres:5432/nodedr_restaurant"
@@ -51,7 +51,7 @@ services:
       # container below to pull the latest published images. Unset these two
       # and the Update button simply says this install can't update itself.
       UPDATER_URL: "http://updater:8080"
-      UPDATER_TOKEN: "${UPDATER_TOKEN:-nodedr-restaurant-updater}"
+      UPDATER_TOKEN: "${UPDATER_TOKEN:-gocard-pos-updater}"
       # Optional: S3 backup config can also be set from Settings > Backup
       # (persisted to the `backup_config` DB row, which takes priority over
       # these). Uncomment for a headless/CasaOS-style deployment that
@@ -106,8 +106,8 @@ services:
         # Next bakes rewrite destinations at BUILD time — this must be a
         # build ARG, not a runtime env (see apps/web/Dockerfile comment).
         BACKEND_URL: "http://backend:4000"
-    image: ghcr.io/raktim94/nodedr-restaurant-pos-web:${APP_VERSION:-dev}
-    container_name: nodedr-restaurant-web
+    image: ghcr.io/enmedia100-web/gocard-pos-web:${APP_VERSION:-dev}
+    container_name: gocard-pos-web
     restart: unless-stopped
     ports:
       - "${HOST_PORT:-1995}:3000"
@@ -125,12 +125,12 @@ services:
   updater:
     build:
       context: ./updater
-    image: ghcr.io/raktim94/nodedr-restaurant-pos-updater:latest
-    container_name: nodedr-restaurant-updater
+    image: ghcr.io/enmedia100-web/gocard-pos-updater:latest
+    container_name: gocard-pos-updater
     restart: unless-stopped
     environment:
-      UPDATER_TOKEN: "${UPDATER_TOKEN:-nodedr-restaurant-updater}"
-      TARGET_CONTAINERS: "nodedr-restaurant-backend,nodedr-restaurant-web"
+      UPDATER_TOKEN: "${UPDATER_TOKEN:-gocard-pos-updater}"
+      TARGET_CONTAINERS: "gocard-pos-backend,gocard-pos-web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 

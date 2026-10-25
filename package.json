@@ -1,18 +1,18 @@
 {
-  "name": "nodedr-orderrestro",
+  "name": "gocard-pos",
   "private": true,
   "version": "0.1.0",
-  "description": "Nodedr OrderRestro — offline-first Restaurant Management System",
-  "author": "Raktim Ranjit <mail@raktimranjit.com> (https://github.com/Raktim94)",
+  "description": "GoCard POS: offline-first restaurant management for Bangladesh (fork of Nodedr OrderRestro)",
+  "author": "GoCard BD",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Raktim94/nodedr-restaurant-pos.git"
+    "url": "https://github.com/enmedia100-web/gocard-pos.git"
   },
   "bugs": {
-    "url": "https://github.com/Raktim94/nodedr-restaurant-pos/issues"
+    "url": "https://github.com/enmedia100-web/gocard-pos/issues"
   },
-  "homepage": "https://orderrestro.nodedr.com/",
+  "homepage": "https://github.com/enmedia100-web/gocard-pos",
   "keywords": [
     "restaurant-management",
     "restaurant-pos",
@@ -21,13 +21,15 @@
     "inventory-management",
     "self-hosted",
     "offline-first",
-    "upi-payments",
-    "gst-billing",
     "restaurant-payroll",
     "qr-ordering",
     "casaos",
     "nestjs",
-    "nextjs"
+    "nextjs",
+    "bangladesh",
+    "bkash",
+    "sslcommerz",
+    "bangla"
   ],
   "scripts": {
     "dev": "turbo run dev",
@@ -44,5 +46,8 @@
   "packageManager": "pnpm@11.10.0",
   "engines": {
     "node": ">=22"
-  }
+  },
+  "contributors": [
+    "Raktim Ranjit <mail@raktimranjit.com> (https://github.com/Raktim94) - original OrderRestro author"
+  ]
 }
